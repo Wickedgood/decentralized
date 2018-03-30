@@ -73,12 +73,12 @@ class User:
 
     def createwebkey(self):
         func = inspect.currentframe().f_back.f_code
-        logging.debug("Creating web key for {}".format(self.name))
         self.webkey = Crypto.Random.get_random_bytes(16 * 2)
+        logging.info("{} Creating web key {}".format(self.name, self.webkey))
 
     def writewebkey(self):
         func = inspect.currentframe().f_back.f_code
-        logging.debug("{} Writing web key as {}".format(self.name,self.webkey))
+        logging.info("{} Writing web key as {}".format(self.name,self.webkey))
         webkey_out = open(path + "webkey.bin", "wb")
         webkey_out.write(self.webkey)
 
@@ -86,20 +86,20 @@ class User:
         func = inspect.currentframe().f_back.f_code
         webkey_in = open(path + "webkey.bin", "rb")
         self.webkey = webkey_in.read()
-        logging.debug("{} Loading web key as {}".format(self.name, self.webkey))
+        logging.info("{} Loading web key as {}".format(self.name, self.webkey))
 
     def assignwebkey(self, key):
         func = inspect.currentframe().f_back.f_code
         self.webkey = key
-        logging.debug("{} Assigning web key as {}".format( self.name,self.webkey))
+        logging.info("{} Assigning web key as {}".format( self.name,self.webkey))
 
     def createaeskeyfromwebkey(self):
         self.aeskey = AES.new(self.webkey, AES.MODE_EAX)
 
-    def encryptdatatosend(self, data):
+    def encryptdatatosend(self, message):
         func = inspect.currentframe().f_back.f_code
-        logging.debug("Encrypting data {} by {}".format(data, self.name))
-        ciphertext, tag = self.aeskey.encrypt_and_digest(bytes(data, "utf-8"))
+        logging.debug("{} Encrypting data {}".format(self.name,message))
+        ciphertext, tag = self.aeskey.encrypt_and_digest(bytes(message, "utf-8"))
         logging.debug("nonce {} tag {} cipher {}".format(self.aeskey.nonce, tag, ciphertext))
         logging.debug("aeskey {}".format(self.aeskey))
         return (self.aeskey.nonce, tag, ciphertext)
@@ -107,11 +107,13 @@ class User:
     def unencryptdatasent(self, data):
         func = inspect.currentframe().f_back.f_code
         logging.debug("Decrypting data {} by {}".format(data, self.name))
+
         nonce, tag, ciphertext = data
         logging.debug("nonce {} tag {} cipher {}".format(nonce, tag, ciphertext))
 
         # let's assume that the key is somehow available again
-        cipher = AES.new(self.aeskey, AES.MODE_EAX, nonce)
+        cipher = AES.new(self.webkey, AES.MODE_EAX, nonce)
         message = cipher.decrypt_and_verify(ciphertext, tag)
-        logging.debug("decrypted data is {}".format(data.decode("utf-8")))
-        return message
+        logging.debug("decrypted data is {}".format(message))
+        return message.decode("utf-8")
+

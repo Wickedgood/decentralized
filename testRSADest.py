@@ -25,15 +25,14 @@ logging.debug("{}\n{}".format(xyfz,adam))
 adam.assignwebkey(data)
 
 adam.createaeskeyfromwebkey()
-print(adam.aeskey.digest())
 ##LOAD EAS KEY
 xyfz.readprivatekey("This is my password")
 xyfz.loadwebkey()
 
 xyfz.createaeskeyfromwebkey()
-print(xyfz.aeskey.digest())
 ##SEND MESSAGE
-message = "Hello there!"
+message = "I'm making a note here, HUGE SUCESS"
 message = xyfz.encryptdatatosend(message)
 message = adam.unencryptdatasent(message)
+print(message)
 logging.debug("END RSADEST")
