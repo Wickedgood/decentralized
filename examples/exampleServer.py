@@ -29,18 +29,25 @@ def handle_client(client):  # Takes client socket as argument.
         if msg != bytes("{quit}", "utf8"):
             broadcast(msg, name + ": ")
         else:
-            client.send(bytes("{quit}", "utf8"))
+            try:
+                client.send(bytes("{quit}", "utf8"))
+            except ConnectionResetError:
+                userquit(name)
             client.close()
             del clients[client]
-            broadcast(bytes("%s has left the chat." % name, "utf8"))
+            userquit(name)
             break
 
-
+def userquit(name):
+    broadcast(bytes("%s has left the chat." % name, "utf8"))
 def broadcast(msg, prefix=""):  # prefix is for name identification.
     """Broadcasts a message to all the clients."""
 
     for sock in clients:
-        sock.send(bytes(prefix, "utf8") + msg)
+        try:
+            sock.send(bytes(prefix, "utf8") + msg)
+        except ConnectionResetError:
+            print("Cannot send to ",prefix," Connection has been reset")
 
 
 clients = {}
