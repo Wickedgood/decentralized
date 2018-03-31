@@ -1,7 +1,6 @@
 import hashlib
 import time
 
-
 # TODO: Sender digitally signs payload. (and recipient too?)
 class Message:
     def __init__(self, data, sender=None, receiver=None):

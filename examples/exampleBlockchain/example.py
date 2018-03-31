@@ -1,7 +1,6 @@
-from exampleBlockchain import Message, Block, Blockchain
+from blockchain import Message, Block, Blockchain
 
 import pickle
-
 B1 = Block()
 B1.add_message(Message("This is the first message"))
 B1.add_message(Message("Second message", "Alice", "Bob"))
@@ -31,7 +30,7 @@ chain.add_block(B4)
 
 print("Validating blockchain...")
 chain.validate()   # all messages and inter-message links are valid, and all blocks and inter-block links are valid
-
+'''
 print("Serializing...")
 pickle.dump(chain, open('chain.p', 'wb'))
 
@@ -50,3 +49,4 @@ pickle.dump(tampered, open('chain.p', 'wb'))
 print("Deserializing tampered chain and validating...")
 chain3 = pickle.load(open('chain.p', 'rb'))
 chain3.validate()       # EARTH-SHATTERING KABOOM
+'''
