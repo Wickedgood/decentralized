@@ -84,6 +84,19 @@ def on_closing(event=None):
     my_msg.set("{quit}")
     send()
 
+def after_callback():
+    try:
+        msg = msglistqueue.get(block=False)
+    except queue.Empty:
+        # let's try again later
+        top.after(100, after_callback)
+        return
+    if msg is not None:
+        # we're not done yet, let's do something with the message and
+        # come back ater
+        msg_list.insert(tkinter.END, msg)
+        top.after(100, after_callback)
+
 
 clients = {}
 addresses = {}
@@ -103,7 +116,7 @@ except OSError:
 
 if __name__ == "__main__":
     top = tkinter.Tk()
-    top.title("Chatter")
+    top.title("Noyz")
     try:
         SERVER.listen()
     except OSError:
@@ -139,22 +152,18 @@ if __name__ == "__main__":
 
     BUFSIZ = 1024
     ADDR = (HOST, PORT)
+    try:
 
-    client_socket = socket(AF_INET, SOCK_STREAM)
-    client_socket.connect(ADDR)
+        client_socket = socket(AF_INET, SOCK_STREAM)
+        client_socket.connect(ADDR)
+    except ConnectionRefusedError:
+        print("You sure about that?")
 
     ACCEPT_THREAD.start()
-    print("here")
-
-    print("Doesn't reach here")
-
     receive_thread = Thread(target=receive)
     receive_thread.start()
-
+    top.after(100, after_callback)
     tkinter.mainloop()  # Starts GUI execution.
 
-    while True:
-        if len(msglistqueue) > 0:
-            msg_list.insert(tkinter.END, msglistqueue.get())
     ACCEPT_THREAD.join()
     SERVER.close()
