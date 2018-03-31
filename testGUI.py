@@ -1,9 +1,12 @@
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
 import tkinter
-
+import queue
+import logging
+import inspect
 
 def accept_incoming_connections():
+
     """Sets up handling for incoming clients."""
     while True:
         client, client_address = SERVER.accept()
@@ -18,7 +21,8 @@ def receive():
     while True:
         try:
             msg = client_socket.recv(BUFSIZ).decode("utf8")
-            msg_list.insert(tkinter.END, msg)
+            #msg_list.insert(tkinter.END, msg)
+            msglistqueue.put(msg)
         except OSError:  # Possibly client has left the chat.
             break
 
@@ -27,7 +31,10 @@ def send(event=None):  # event is passed by binders.
     """Handles sending of messages."""
     msg = my_msg.get()
     my_msg.set("")  # Clears input field.
-    client_socket.send(bytes(msg, "utf8"))
+    try:
+        client_socket.send(bytes(msg, "utf8"))
+    except ConnectionResetError:
+        pass
     if msg == "{quit}":
         client_socket.close()
         top.quit()
@@ -86,6 +93,8 @@ PORT = 31337
 BUFSIZ = 1024
 ADDR = (HOST, PORT)
 
+msglistqueue = queue.Queue()
+
 SERVER = socket(AF_INET, SOCK_STREAM)
 try:
     SERVER.bind(ADDR)
@@ -133,10 +142,19 @@ if __name__ == "__main__":
 
     client_socket = socket(AF_INET, SOCK_STREAM)
     client_socket.connect(ADDR)
+
     ACCEPT_THREAD.start()
-    ACCEPT_THREAD.join()
+    print("here")
+
+    print("Doesn't reach here")
+
     receive_thread = Thread(target=receive)
     receive_thread.start()
+
     tkinter.mainloop()  # Starts GUI execution.
 
+    while True:
+        if len(msglistqueue) > 0:
+            msg_list.insert(tkinter.END, msglistqueue.get())
+    ACCEPT_THREAD.join()
     SERVER.close()
