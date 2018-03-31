@@ -15,6 +15,8 @@ combining into one
 3/31 - Combined the server and chat. Now I need to clean up the code as much as I can
 so that I can implment the ledger
 
+3/31 - Do I need the ledger?
+
 
 **TODO LIST**
 
@@ -25,6 +27,8 @@ so that I can implment the ledger
 ~~Combine Client and Server successfully. Fails: 3 times~~
 
 Research and implement distributed ledger
+
+On second thought, I don't think i need this.
 
 
 **Task list**
