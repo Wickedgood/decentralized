@@ -3,7 +3,7 @@
 
 **The Log**
 
-3/28 - Can't get pycrypto installed. Fucking dependencies
+day 1 3/28 - Can't get pycrypto installed. Fucking dependencies
 
 3/29 - Switching to pycryptodome instead. Got it working. Use comments and a log file, idiot
 
@@ -16,6 +16,9 @@ combining into one
 so that I can implment the ledger
 
 3/31 - Do I need the ledger?
+
+day 5 4/1 - Logging the sockets so i understand whats happening. I really need some vms so that I can test this better
+
 
 
 **TODO LIST**

@@ -4,47 +4,65 @@ import tkinter
 import queue
 import logging
 import inspect
+import Config
 
 def accept_incoming_connections():
+    func = inspect.currentframe().f_back.f_code
+
 
     """Sets up handling for incoming clients."""
     while True:
-        client, client_address = SERVER.accept()
-        print("%s:%s has connected." % client_address)
-        client.send(bytes("Greetings from the cave! Now type your name and press enter!", "utf8"))
-        addresses[client] = client_address
-        Thread(target=handle_client, args=(client,)).start()
+        try:
+            client, client_address = SERVER.accept()
+            logging.debug("Accepted an incoming connection from {}".format(client_address))
+            client.send(bytes("Greetings from the void! Enter your name!", "utf8"))
+            addresses[client] = client_address
+            Thread(target=handle_client, args=(client,)).start()
+        except OSError as e:
+            logging.debug("Exception raised {} - {}".format(e.errno,e.strerror))
+
+
 
 
 def receive():
+    func = inspect.currentframe().f_back.f_code
     """Handles receiving of messages."""
+    logging.debug("receive starting")
     while True:
         try:
             msg = client_socket.recv(BUFSIZ).decode("utf8")
+            logging.debug("{}".format(msg))
             #msg_list.insert(tkinter.END, msg)
             msglistqueue.put(msg)
+            msg = None
         except OSError:  # Possibly client has left the chat.
             break
 
 
 def send(event=None):  # event is passed by binders.
+    func = inspect.currentframe().f_back.f_code
     """Handles sending of messages."""
     msg = my_msg.get()
     my_msg.set("")  # Clears input field.
+    logging.debug("Sending")
     try:
         client_socket.send(bytes(msg, "utf8"))
     except ConnectionResetError:
         pass
     if msg == "{quit}":
+        logging.debug("quitting my own client")
         client_socket.close()
         top.quit()
 
 
 def userquit(name):
+    func = inspect.currentframe().f_back.f_code
     broadcast(bytes("%s has left the chat." % name, "utf8"))
 
 
 def broadcast(msg, prefix=""):
+    func = inspect.currentframe().f_back.f_code
+    logging.debug("Broadcasting")
     # prefix is for name identification.
     """Broadcasts a message to all the clients."""
     for sock in clients:
@@ -55,6 +73,7 @@ def broadcast(msg, prefix=""):
 
 
 def handle_client(client):  # Takes client socket as argument.
+    func = inspect.currentframe().f_back.f_code
     """Handles a single client connection."""
 
     name = client.recv(BUFSIZ).decode("utf8")
@@ -80,11 +99,13 @@ def handle_client(client):  # Takes client socket as argument.
 
 
 def on_closing(event=None):
+    func = inspect.currentframe().f_back.f_code
     """This function is to be called when the window is closed."""
     my_msg.set("{quit}")
     send()
 
 def after_callback():
+    func = inspect.currentframe().f_back.f_code
     try:
         msg = msglistqueue.get(block=False)
     except queue.Empty:
@@ -165,5 +186,5 @@ if __name__ == "__main__":
     top.after(100, after_callback)
     tkinter.mainloop()  # Starts GUI execution.
 
-    ACCEPT_THREAD.join()
+    #ACCEPT_THREAD.join()
     SERVER.close()
