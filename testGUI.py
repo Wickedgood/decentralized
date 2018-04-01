@@ -103,28 +103,28 @@ def broadcast(msg, prefix=""):
 def handle_client(client):  # Takes client socket as argument.
     func = inspect.currentframe().f_back.f_code
     """Handles a single client connection."""
-    global name
-    welcome = 'Welcome %s! If you ever want to quit, type {quit} to exit.' % name
+    global NAME
+    welcome = 'Welcome %s! If you ever want to quit, type {quit} to exit.' % NAME
     client.send(bytes(welcome, "utf8"))
-    msg = "%s has joined the chat!" % name
+    msg = "%s has joined the chat!" % NAME
     broadcast(bytes(msg, "utf8"))
-    clients[client] = name
+    clients[client] = NAME
 
     while True:
         try:
             msg = client.recv(BUFSIZ)
         except ConnectionAbortedError:
-            userquit(name)
+            userquit(NAME)
         if msg != bytes("{quit}", "utf8"):
-            broadcast(msg, name + ": ")
+            broadcast(msg, NAME + ": ")
         else:
             try:
                 client.send(bytes("{quit}", "utf8"))
             except ConnectionResetError:
-                userquit(name)
+                userquit(NAME)
             client.close()
             del clients[client]
-            userquit(name)
+            userquit(NAME)
             break
 
 
