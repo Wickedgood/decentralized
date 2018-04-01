@@ -5,6 +5,7 @@ import queue
 import logging
 import inspect
 import Config
+import sys
 
 def accept_incoming_connections():
     func = inspect.currentframe().f_back.f_code
@@ -12,16 +13,43 @@ def accept_incoming_connections():
 
     """Sets up handling for incoming clients."""
     while True:
-        try:
-            client, client_address = SERVER.accept()
-            logging.debug("Accepted an incoming connection from {}".format(client_address))
-            client.send(bytes("Greetings from the void! Enter your name!", "utf8"))
-            addresses[client] = client_address
-            Thread(target=handle_client, args=(client,)).start()
-        except OSError as e:
-            logging.debug("Exception raised {} - {}".format(e.errno,e.strerror))
+        client, client_address = SERVER.accept()
+        logging.debug("Accepted an incoming connection from {}".format(client_address))
+        addresses[client] = client_address
+        Thread(target=handle_client, args=(client,)).start()
 
 
+
+
+
+def ask(prompt):
+    """Ask a string from the user and return it.
+
+    This must be ran before making a ClientGUI instance or some
+    other tk.Tk() window.
+    """
+    def on_ok(event=None):
+        nonlocal result
+        result = entry.get()
+        root.destroy()
+
+    result = None
+    root = tkinter.Tk()
+
+    label = tkinter.Label(root, text=prompt)
+    label.place(relx=0.5, rely=0.1, anchor='center')
+    entry = tkinter.Entry(root, font='TkFixedFont')
+    entry.bind('<Return>', on_ok)
+    entry.place(relx=0.5, rely=0.4, anchor='center')
+    button = tkinter.Button(root, text="OK", command=on_ok)
+    button.place(relx=0.5, rely=0.8, anchor='center')
+
+    entry.focus_set()
+    root.geometry('300x150')
+    root.mainloop()
+    if result is None:
+        sys.exit()
+    return result
 
 
 def receive():
@@ -75,8 +103,7 @@ def broadcast(msg, prefix=""):
 def handle_client(client):  # Takes client socket as argument.
     func = inspect.currentframe().f_back.f_code
     """Handles a single client connection."""
-
-    name = client.recv(BUFSIZ).decode("utf8")
+    global name
     welcome = 'Welcome %s! If you ever want to quit, type {quit} to exit.' % name
     client.send(bytes(welcome, "utf8"))
     msg = "%s has joined the chat!" % name
@@ -84,7 +111,10 @@ def handle_client(client):  # Takes client socket as argument.
     clients[client] = name
 
     while True:
-        msg = client.recv(BUFSIZ)
+        try:
+            msg = client.recv(BUFSIZ)
+        except ConnectionAbortedError:
+            userquit(name)
         if msg != bytes("{quit}", "utf8"):
             broadcast(msg, name + ": ")
         else:
@@ -126,6 +156,7 @@ HOST = ''
 PORT = 31337
 BUFSIZ = 1024
 ADDR = (HOST, PORT)
+NAME = None
 
 msglistqueue = queue.Queue()
 
@@ -136,6 +167,9 @@ except OSError:
     print("Server is already running?")
 
 if __name__ == "__main__":
+
+    NAME = ask("name?")
+    hosttouse = ask("ip?")
     top = tkinter.Tk()
     top.title("Noyz")
     try:
@@ -168,7 +202,7 @@ if __name__ == "__main__":
 
     # ----Now comes the sockets part----
     # HOST = input('Enter host: ')
-    HOST = "127.0.0.1"
+    HOST = hosttouse
     PORT = 31337
 
     BUFSIZ = 1024
@@ -184,6 +218,7 @@ if __name__ == "__main__":
     receive_thread = Thread(target=receive)
     receive_thread.start()
     top.after(100, after_callback)
+
     tkinter.mainloop()  # Starts GUI execution.
 
     #ACCEPT_THREAD.join()
