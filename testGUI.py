@@ -83,6 +83,7 @@ def send(event=None):  # event is passed by binders.
         top.quit()
 
 
+
 def userquit(name):
     func = inspect.currentframe().f_back.f_code
     broadcast(bytes("%s has left the chat." % name, "utf8"))
