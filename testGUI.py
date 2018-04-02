@@ -101,6 +101,8 @@ def broadcast(msg, prefix=""):
             print("Cannot send to ", prefix, " Connection has been reset")
 
 
+
+#fuck
 def handle_client(client):  # Takes client socket as argument.
     func = inspect.currentframe().f_back.f_code
     """Handles a single client connection."""
