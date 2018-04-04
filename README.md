@@ -2,6 +2,7 @@
 ##Decentralized p2p cryptographically secure chat client/server combination
 
 **The Log**
+3/28 - lionkingitstarts.jpg
 3/28 - Can't get pycrypto installed. Fucking dependencies
 3/29 - Switching to pycryptodome instead. Got it working. Use comments and a log file, idiot
 3/30 - Found good examples for Gui and Server. The gui looks like shit but, beggers can't be choosers. Having a hard time
