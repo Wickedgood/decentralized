@@ -13,7 +13,6 @@ def accept_incoming_connections():
         addresses[client] = client_address
         Thread(target=handle_client, args=(client,)).start()
 
-
 def handle_client(client):  # Takes client socket as argument.
     """Handles a single client connection."""
 
@@ -40,9 +39,11 @@ def handle_client(client):  # Takes client socket as argument.
 
 def userquit(name):
     broadcast(bytes("%s has left the chat." % name, "utf8"))
-def broadcast(msg, prefix=""):  # prefix is for name identification.
-    """Broadcasts a message to all the clients."""
 
+
+def broadcast(msg, prefix=""):
+    # prefix is for name identification.
+    """Broadcasts a message to all the clients."""
     for sock in clients:
         try:
             sock.send(bytes(prefix, "utf8") + msg)
@@ -62,7 +63,7 @@ SERVER = socket(AF_INET, SOCK_STREAM)
 SERVER.bind(ADDR)
 
 if __name__ == "__main__":
-    SERVER.listen(5)
+    SERVER.listen()
     print("Waiting for connection...")
     ACCEPT_THREAD = Thread(target=accept_incoming_connections)
     ACCEPT_THREAD.start()
