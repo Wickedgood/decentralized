@@ -10,6 +10,7 @@ import time
 class Node:
     def start_server(self, server_addr):
         func = inspect.currentframe().f_back.f_code
+        logging.debug("Starting server at {}".format(server_addr))
         self.server_addr = server_addr
         HOST, PORT = self.server_addr.split(":")
         PORT = int(PORT)
@@ -24,7 +25,7 @@ class Node:
     def listen(self):
         func = inspect.currentframe().f_back.f_code
         self.SERVER.listen()
-        print("Waiting for connection...")
+        logging.debug("Waiting for connection...")
         ACCEPT_THREAD = Thread(target=self.accept_incoming_connections)
         ACCEPT_THREAD.start()
         ACCEPT_THREAD.join()
@@ -35,7 +36,7 @@ class Node:
         func = inspect.currentframe().f_back.f_code
         while True:
             client, client_address = self.SERVER.accept()
-            print("%s:%s has connected." % client_address)
+            logging.debug("%s:%s has connected." % client_address)
 
             # Welcome message
             client.send(bytes("Type your name and press enter: ", "utf8"))
@@ -59,7 +60,6 @@ class Node:
             time.sleep(1)
             self.broadcast(bytes(msg, "utf8"))
         elif (data[0] == '\x12'):
-            # print("peers: " + str(data))
             check = data.split('|')[0]
             # print(check)
             if (check == "\x12{Peers}"):
@@ -67,12 +67,10 @@ class Node:
                 added = self.update_peers(data)
                 if added:
                     self.broadcast(bytes(data, 'utf8'))
-                    # print("Connections: {0}".format(str(self.connections)))
         x = 10
         while True:  # x > 0:
             x = x - 1
             msg = client.recv(self.BUFSIZ)
-            # print("RecieveMsg: " + msg.decode('utf8'))
             if msg != bytes("\x13{quit}", "utf8"):
                 print(msg.decode('utf8'))
                 msgDecode = msg.decode('utf8')
@@ -112,7 +110,7 @@ class Node:
         func = inspect.currentframe().f_back.f_code
 
         ip, port = addr.split(':')
-        print("Registering peer {0} at {1}".format(name, addr))
+        logging.debug("Registering peer {0} at {1}".format(name, addr))
         port = int(port)
         sock = socket(AF_INET, SOCK_STREAM)
         sock.connect((ip, port))
@@ -134,13 +132,13 @@ class Node:
                 try:
                     self.connections[name][1].send(bytes(prefix, "utf8") + msg)
                 except ConnectionResetError:
-                    print("Cannot send to ", prefix, " Connection has been reset")
+                    logging.debug("Cannot send to ", prefix, " Connection has been reset")
 
     def userquit(self, name):
         func = inspect.currentframe().f_back.f_code
 
         # Nodes need to note that a peer has left still, and remove it from their peer store
-        print("{0} has quit.".format(name))
+        logging.debug("{0} has quit.".format(name))
         del self.connections[name]
         self.broadcast(bytes("%s has left the chat." % name, "utf8"))
 
@@ -172,17 +170,18 @@ class Node:
         self.input_loop()
 
     def __init__(self, server_addr, client_addr):
+        func = inspect.currentframe().f_back.f_code
         # server = Node.Server(server_addr)
         self.connections = {}
         self.name = ""
         self.start_server(server_addr)
-        print("server started")
+        logging.debug("server started")
 
         # client = Node.Client(client_addr)
         if client_addr is not None:
             self.connect_client(client_addr)
             self.input_loop()
-            print("client started")
+            logging.debug("client started")
 
 
 server_addr = "0.0.0.0:31337"

@@ -6,3 +6,4 @@ logger = logging.getLogger('root')
 
 FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
 logging.basicConfig(filename=path + 'runlog.log', level=logging.DEBUG, format=FORMAT)
+print("Config Loaded")
