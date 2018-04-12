@@ -118,21 +118,24 @@ class Node:
         func = inspect.currentframe().f_back.f_code
 
         ip, port = addr.split(':')
-        logging.debug("Registering peer {0} at {1}".format(name, addr))
-        port = int(port)
-        sock = socket(AF_INET, SOCK_STREAM)
-        logging.debug("{}{}".format(addr,name))
-        sock.connect((ip, port))
-        self.connections[name] = ((ip, port), sock)
-        peers = "\x12{Peers}|" + ",".join(list(
-            map(lambda x: x + ":" + self.connections[x][0][0] + ":" + str(self.connections[x][0][1]),
-                self.connections)))
-        peers = peers + ",{0}:{1}".format(self.name, self.server_addr)
-        self.broadcast(bytes(peers, 'utf8'))
+        if ip != "127.0.0.1":
+            logging.debug("Registering peer {0} at {1}".format(name, addr))
+            port = int(port)
+            sock = socket(AF_INET, SOCK_STREAM)
+            logging.debug("{}{}".format(addr,name))
+            sock.connect((ip, port))
+            self.connections[name] = ((ip, port), sock)
+            peers = "\x12{Peers}|" + ",".join(list(
+                map(lambda x: x + ":" + self.connections[x][0][0] + ":" + str(self.connections[x][0][1]),
+                    self.connections)))
+            peers = peers + ",{0}:{1}".format(self.name, self.server_addr)
+            self.broadcast(bytes(peers, 'utf8'))
+        else:
+            logging.debug("not registering a local connection, that's silly.")
 
     def broadcast(self, msg, prefix=""):
         func = inspect.currentframe().f_back.f_code
-
+        logging.debug("{}".format(msg))
         sender = msg.decode('utf8').split(":")[0:-1]
         sender = list(map(lambda x: x.strip(), sender))
         for name in self.connections:
@@ -145,7 +148,7 @@ class Node:
 
     def userquit(self, name):
         func = inspect.currentframe().f_back.f_code
-
+        logging.debug("{}".format(name))
         # Nodes need to note that a peer has left still, and remove it from their peer store
         logging.debug("{0} has quit.".format(name))
         del self.connections[name]
@@ -153,7 +156,7 @@ class Node:
 
     def input_loop(self):
         func = inspect.currentframe().f_back.f_code
-
+        logging.debug(" ")
         """Handles sending of messages."""
         while True:
             msg = input("Get Input: ")
@@ -164,7 +167,7 @@ class Node:
 
     def connect_client(self, client_addr):
         func = inspect.currentframe().f_back.f_code
-
+        logging.debug("{}".format(client_addr))
         ip, port = client_addr.split(':')
         port = int(port)
         self.client_addr = (ip, port)
@@ -180,6 +183,8 @@ class Node:
 
     def __init__(self, server_addr, client_addr):
         func = inspect.currentframe().f_back.f_code
+        logging.debug("{},{}".format(server_addr,client_addr))
+
         # server = Node.Server(server_addr)
         self.connections = {}
         self.name = ""
@@ -203,8 +208,9 @@ else:
 if client_addr == "":
     # client_addr = server_addr
     client_addr = "127.0.0.1:"+str(PORT)
-if client_addr != None:
+else:
     client_addr += ":"+str(PORT)
+
 
 node = Node(server_addr, client_addr)
 
