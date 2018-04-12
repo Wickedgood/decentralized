@@ -1,11 +1,15 @@
 """Server for multithreaded (asynchronous) chat application."""
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
+import Config
+import logging
+import inspect
 import time
 
 
 class Node:
     def start_server(self, server_addr):
+        func = inspect.currentframe().f_back.f_code
         self.server_addr = server_addr
         HOST, PORT = self.server_addr.split(":")
         PORT = int(PORT)
@@ -18,6 +22,7 @@ class Node:
         Thread(target=self.listen).start()
 
     def listen(self):
+        func = inspect.currentframe().f_back.f_code
         self.SERVER.listen()
         print("Waiting for connection...")
         ACCEPT_THREAD = Thread(target=self.accept_incoming_connections)
@@ -27,6 +32,7 @@ class Node:
 
     # Listen for incomming connections
     def accept_incoming_connections(self):
+        func = inspect.currentframe().f_back.f_code
         while True:
             client, client_address = self.SERVER.accept()
             print("%s:%s has connected." % client_address)
@@ -37,10 +43,8 @@ class Node:
             Thread(target=self.handle_client, args=(client,)).start()
 
     def handle_client(self, client):  # Takes client socket as argument.
-        # print(client)
+        func = inspect.currentframe().f_back.f_code
         data = client.recv(self.BUFSIZ).decode("utf8")
-        # print("handle string: {0} end".format(data))
-
         if (data[0] == '\x11'):
             # print("register")
             check, addr, name = data.split('|')
@@ -88,6 +92,8 @@ class Node:
                 break
 
     def update_peers(self, peer_str):
+        func = inspect.currentframe().f_back.f_code
+
         # print(peer_str)
         peers_csv = peer_str.split("|")[1]
         peers = list(peers_csv.split(","))
@@ -103,6 +109,7 @@ class Node:
         return added
 
     def register_conn(self, addr, name):
+        func = inspect.currentframe().f_back.f_code
 
         ip, port = addr.split(':')
         print("Registering peer {0} at {1}".format(name, addr))
@@ -117,6 +124,8 @@ class Node:
         self.broadcast(bytes(peers, 'utf8'))
 
     def broadcast(self, msg, prefix=""):
+        func = inspect.currentframe().f_back.f_code
+
         sender = msg.decode('utf8').split(":")[0:-1]
         sender = list(map(lambda x: x.strip(), sender))
         for name in self.connections:
@@ -128,12 +137,16 @@ class Node:
                     print("Cannot send to ", prefix, " Connection has been reset")
 
     def userquit(self, name):
+        func = inspect.currentframe().f_back.f_code
+
         # Nodes need to note that a peer has left still, and remove it from their peer store
         print("{0} has quit.".format(name))
         del self.connections[name]
         self.broadcast(bytes("%s has left the chat." % name, "utf8"))
 
     def input_loop(self):
+        func = inspect.currentframe().f_back.f_code
+
         """Handles sending of messages."""
         while True:
             msg = input("Get Input: ")
@@ -143,6 +156,8 @@ class Node:
                 break
 
     def connect_client(self, client_addr):
+        func = inspect.currentframe().f_back.f_code
+
         ip, port = client_addr.split(':')
         port = int(port)
         self.client_addr = (ip, port)
@@ -170,13 +185,15 @@ class Node:
             print("client started")
 
 
-server_addr = input("server address (where this server listens): ")
+server_addr = "0.0.0.0:31337"
 
 client_addr = input("client address (where this client will send to/recieve from): ")
 # connect first client to its own server
 if client_addr == "":
     # client_addr = server_addr
     client_addr = None
+if client_addr != None:
+    client_addr += ":31337"
 
 node = Node(server_addr, client_addr)
 
