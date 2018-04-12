@@ -1,0 +1,268 @@
+Dir
+['__class__', '__del__', '__delattr__', '__dir__', '__doc__', '__enter__', '__eq__', '__exit__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__slots__', '__str__', '__subclasshook__', '__weakref__', '_accept', '_check_sendfile_params', '_closed', '_decref_socketios', '_io_refs', '_real_close', '_sendfile_use_send', '_sendfile_use_sendfile', 'accept', 'bind', 'close', 'connect', 'connect_ex', 'detach', 'dup', 'family', 'fileno', 'get_inheritable', 'getpeername', 'getsockname', 'getsockopt', 'gettimeout', 'ioctl', 'listen', 'makefile', 'proto', 'recv', 'recv_into', 'recvfrom', 'recvfrom_into', 'send', 'sendall', 'sendfile', 'sendto', 'set_inheritable', 'setblocking', 'setsockopt', 'settimeout', 'share', 'shutdown', 'timeout', 'type']
+help
+Help on socket in module socket object:
+
+class socket(_socket.socket)
+ |  A subclass of _socket.socket adding the makefile() method.
+ |
+ |  Method resolution order:
+ |      socket
+ |      _socket.socket
+ |      builtins.object
+ |
+ |  Methods defined here:
+ |
+ |  __enter__(self)
+ |
+ |  __exit__(self, *args)
+ |
+ |  __getstate__(self)
+ |
+ |  __init__(self, family=<AddressFamily.AF_INET: 2>, type=<SocketKind.SOCK_STREAM: 1>, proto=0, fileno=None)
+ |      Initialize self.  See help(type(self)) for accurate signature.
+ |
+ |  __repr__(self)
+ |      Wrap __repr__() to reveal the real class name and socket
+ |      address(es).
+ |
+ |  accept(self)
+ |      accept() -> (socket object, address info)
+ |
+ |      Wait for an incoming connection.  Return a new socket
+ |      representing the connection, and the address of the client.
+ |      For IP sockets, the address info is a pair (hostaddr, port).
+ |
+ |  close(self)
+ |      close()
+ |
+ |      Close the socket.  It cannot be used after this call.
+ |
+ |  detach(self)
+ |      detach() -> file descriptor
+ |
+ |      Close the socket object without closing the underlying file descriptor.
+ |      The object cannot be used after this call, but the file descriptor
+ |      can be reused for other purposes.  The file descriptor is returned.
+ |
+ |  dup(self)
+ |      dup() -> socket object
+ |
+ |      Duplicate the socket. Return a new socket object connected to the same
+ |      system resource. The new socket is non-inheritable.
+ |
+ |  get_inheritable(self)
+ |      Get the inheritable flag of the socket
+ |
+ |  makefile(self, mode='r', buffering=None, *, encoding=None, errors=None, newline=None)
+ |      makefile(...) -> an I/O stream connected to the socket
+ |
+ |      The arguments are as for io.open() after the filename, except the only
+ |      supported mode values are 'r' (default), 'w' and 'b'.
+ |
+ |  sendfile(self, file, offset=0, count=None)
+ |      sendfile(file[, offset[, count]]) -> sent
+ |
+ |      Send a file until EOF is reached by using high-performance
+ |      os.sendfile() and return the total number of bytes which
+ |      were sent.
+ |      *file* must be a regular file object opened in binary mode.
+ |      If os.sendfile() is not available (e.g. Windows) or file is
+ |      not a regular file socket.send() will be used instead.
+ |      *offset* tells from where to start reading the file.
+ |      If specified, *count* is the total number of bytes to transmit
+ |      as opposed to sending the file until EOF is reached.
+ |      File position is updated on return or also in case of error in
+ |      which case file.tell() can be used to figure out the number of
+ |      bytes which were sent.
+ |      The socket must be of SOCK_STREAM type.
+ |      Non-blocking sockets are not supported.
+ |
+ |  set_inheritable(self, inheritable)
+ |      Set the inheritable flag of the socket
+ |
+ |  ----------------------------------------------------------------------
+ |  Data descriptors defined here:
+ |
+ |  __weakref__
+ |      list of weak references to the object (if defined)
+ |
+ |  family
+ |      Read-only access to the address family for this socket.
+ |
+ |  type
+ |      Read-only access to the socket type.
+ |
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from _socket.socket:
+ |
+ |  __del__(...)
+ |
+ |  __getattribute__(self, name, /)
+ |      Return getattr(self, name).
+ |
+ |  __new__(*args, **kwargs) from builtins.type
+ |      Create and return a new object.  See help(type) for accurate signature.
+ |
+ |  bind(...)
+ |      bind(address)
+ |
+ |      Bind the socket to a local address.  For IP sockets, the address is a
+ |      pair (host, port); the host must refer to the local host. For raw packet
+ |      sockets the address is a tuple (ifname, proto [,pkttype [,hatype]])
+ |
+ |  connect(...)
+ |      connect(address)
+ |
+ |      Connect the socket to a remote address.  For IP sockets, the address
+ |      is a pair (host, port).
+ |
+ |  connect_ex(...)
+ |      connect_ex(address) -> errno
+ |
+ |      This is like connect(address), but returns an error code (the errno value)
+ |      instead of raising an exception when an error occurs.
+ |
+ |  fileno(...)
+ |      fileno() -> integer
+ |
+ |      Return the integer file descriptor of the socket.
+ |
+ |  getpeername(...)
+ |      getpeername() -> address info
+ |
+ |      Return the address of the remote endpoint.  For IP sockets, the address
+ |      info is a pair (hostaddr, port).
+ |
+ |  getsockname(...)
+ |      getsockname() -> address info
+ |
+ |      Return the address of the local endpoint.  For IP sockets, the address
+ |      info is a pair (hostaddr, port).
+ |
+ |  getsockopt(...)
+ |      getsockopt(level, option[, buffersize]) -> value
+ |
+ |      Get a socket option.  See the Unix manual for level and option.
+ |      If a nonzero buffersize argument is given, the return value is a
+ |      string of that length; otherwise it is an integer.
+ |
+ |  gettimeout(...)
+ |      gettimeout() -> timeout
+ |
+ |      Returns the timeout in seconds (float) associated with socket
+ |      operations. A timeout of None indicates that timeouts on socket
+ |      operations are disabled.
+ |
+ |  ioctl(...)
+ |      ioctl(cmd, option) -> long
+ |
+ |      Control the socket with WSAIoctl syscall. Currently supported 'cmd' values are
+ |      SIO_RCVALL:  'option' must be one of the socket.RCVALL_* constants.
+ |      SIO_KEEPALIVE_VALS:  'option' is a tuple of (onoff, timeout, interval).
+ |      SIO_LOOPBACK_FAST_PATH: 'option' is a boolean value, and is disabled by default
+ |
+ |  listen(...)
+ |      listen([backlog])
+ |
+ |      Enable a server to accept connections.  If backlog is specified, it must be
+ |      at least 0 (if it is lower, it is set to 0); it specifies the number of
+ |      unaccepted connections that the system will allow before refusing new
+ |      connections. If not specified, a default reasonable value is chosen.
+ |
+ |  recv(...)
+ |      recv(buffersize[, flags]) -> data
+ |
+ |      Receive up to buffersize bytes from the socket.  For the optional flags
+ |      argument, see the Unix manual.  When no data is available, block until
+ |      at least one byte is available or until the remote end is closed.  When
+ |      the remote end is closed and all data is read, return the empty string.
+ |
+ |  recv_into(...)
+ |      recv_into(buffer, [nbytes[, flags]]) -> nbytes_read
+ |
+ |      A version of recv() that stores its data into a buffer rather than creating
+ |      a new string.  Receive up to buffersize bytes from the socket.  If buffersize
+ |      is not specified (or 0), receive up to the size available in the given buffer.
+ |
+ |      See recv() for documentation about the flags.
+ |
+ |  recvfrom(...)
+ |      recvfrom(buffersize[, flags]) -> (data, address info)
+ |
+ |      Like recv(buffersize, flags) but also return the sender's address info.
+ |
+ |  recvfrom_into(...)
+ |      recvfrom_into(buffer[, nbytes[, flags]]) -> (nbytes, address info)
+ |
+ |      Like recv_into(buffer[, nbytes[, flags]]) but also return the sender's address info.
+ |
+ |  send(...)
+ |      send(data[, flags]) -> count
+ |
+ |      Send a data string to the socket.  For the optional flags
+ |      argument, see the Unix manual.  Return the number of bytes
+ |      sent; this may be less than len(data) if the network is busy.
+ |
+ |  sendall(...)
+ |      sendall(data[, flags])
+ |
+ |      Send a data string to the socket.  For the optional flags
+ |      argument, see the Unix manual.  This calls send() repeatedly
+ |      until all data is sent.  If an error occurs, it's impossible
+ |      to tell how much data has been sent.
+ |
+ |  sendto(...)
+ |      sendto(data[, flags], address) -> count
+ |
+ |      Like send(data, flags) but allows specifying the destination address.
+ |      For IP sockets, the address is a pair (hostaddr, port).
+ |
+ |  setblocking(...)
+ |      setblocking(flag)
+ |
+ |      Set the socket to blocking (flag is true) or non-blocking (false).
+ |      setblocking(True) is equivalent to settimeout(None);
+ |      setblocking(False) is equivalent to settimeout(0.0).
+ |
+ |  setsockopt(...)
+ |      setsockopt(level, option, value: int)
+ |      setsockopt(level, option, value: buffer)
+ |      setsockopt(level, option, None, optlen: int)
+ |
+ |      Set a socket option.  See the Unix manual for level and option.
+ |      The value argument can either be an integer, a string buffer, or
+ |      None, optlen.
+ |
+ |  settimeout(...)
+ |      settimeout(timeout)
+ |
+ |      Set a timeout on socket operations.  'timeout' can be a float,
+ |      giving in seconds, or None.  Setting a timeout of None disables
+ |      the timeout feature and is equivalent to setblocking(1).
+ |      Setting a timeout of zero is the same as setblocking(0).
+ |
+ |  share(...)
+ |      share(process_id) -> bytes
+ |
+ |      Share the socket with another process.  The target process id
+ |      must be provided and the resulting bytes object passed to the target
+ |      process.  There the shared socket can be instantiated by calling
+ |      socket.fromshare().
+ |
+ |  shutdown(...)
+ |      shutdown(flag)
+ |
+ |      Shut down the reading side of the socket (flag == SHUT_RD), the writing side
+ |      of the socket (flag == SHUT_WR), or both ends (flag == SHUT_RDWR).
+ |
+ |  ----------------------------------------------------------------------
+ |  Data descriptors inherited from _socket.socket:
+ |
+ |  proto
+ |      the socket protocol
+ |
+ |  timeout
+ |      the socket timeout
+
+None

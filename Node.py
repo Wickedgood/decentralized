@@ -5,6 +5,9 @@ import Config
 import logging
 import inspect
 import time
+import sys
+
+PORT = 31337
 
 
 class Node:
@@ -36,7 +39,8 @@ class Node:
         func = inspect.currentframe().f_back.f_code
         while True:
             client, client_address = self.SERVER.accept()
-            logging.debug("%s:%s has connected." % client_address)
+            # logging.debug("%s:%s has connected." % client_address)
+
 
             # Welcome message
             client.send(bytes("Type your name and press enter: ", "utf8"))
@@ -52,7 +56,11 @@ class Node:
             if (check != "\x11{Register}" and (addr != self.server_addr)):
                 client.send(bytes("\x10Bad friend, you have to register yourself.", "utf8"))
                 return
-
+            # print("peer",str(client.getpeername()))
+            global PORT
+            addr = str(client.getpeername()[0]) + ":" + str(PORT)
+            # print("sock", str(client.getsockname()))
+            # logging.debug("craddr{} name{}".format(client.raddr,name))
             self.register_conn(addr, name)
             welcome = '\x10Welcome %s! If you ever want to quit, type {quit} to exit.' % name
             client.send(bytes(welcome, "utf8"))
@@ -113,6 +121,7 @@ class Node:
         logging.debug("Registering peer {0} at {1}".format(name, addr))
         port = int(port)
         sock = socket(AF_INET, SOCK_STREAM)
+        logging.debug("{}{}".format(addr,name))
         sock.connect((ip, port))
         self.connections[name] = ((ip, port), sock)
         peers = "\x12{Peers}|" + ",".join(list(
@@ -184,15 +193,24 @@ class Node:
             logging.debug("client started")
 
 
-server_addr = "0.0.0.0:31337"
-
-client_addr = input("client address (where this client will send to/recieve from): ")
+server_addr = "0.0.0.0:" + str(PORT)
+if len(sys.argv) == 1:
+    client_addr = input("client address (where this client will send to/recieve from): ")
+else:
+    client_addr = sys.argv[1]
 # connect first client to its own server
+
 if client_addr == "":
     # client_addr = server_addr
-    client_addr = None
+    client_addr = "127.0.0.1:"+str(PORT)
 if client_addr != None:
-    client_addr += ":31337"
+    client_addr += ":"+str(PORT)
 
 node = Node(server_addr, client_addr)
 
+'''
+c = 0
+for key, value in client_address.items():
+    logging.debug("{}{}:{}".format(c,key,value))
+    c+=1
+'''
