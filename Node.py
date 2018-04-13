@@ -40,8 +40,6 @@ class Node:
         while True:
             client, client_address = self.SERVER.accept()
             # logging.debug("%s:%s has connected." % client_address)
-
-
             # Welcome message
             client.send(bytes("Type your name and press enter: ", "utf8"))
 
@@ -49,8 +47,10 @@ class Node:
 
     def handle_client(self, client):  # Takes client socket as argument.
         func = inspect.currentframe().f_back.f_code
+        logging.debug("client: {}".format(str(client)))
         data = client.recv(self.BUFSIZ).decode("utf8")
         if (data[0] == '\x11'):
+            logging.debug("x11")
             # print("register")
             check, addr, name = data.split('|')
             if (check != "\x11{Register}" and (addr != self.server_addr)):
@@ -62,25 +62,18 @@ class Node:
             # print("sock", str(client.getsockname()))
             # logging.debug("craddr{} name{}".format(client.raddr,name))
             self.register_conn(addr, name)
-            welcome = '\x10Welcome %s! If you ever want to quit, type {quit} to exit.' % name
-            client.send(bytes(welcome, "utf8"))
-            msg = "%s has joined the chat!" % name
-            time.sleep(1)
-            self.broadcast(bytes(msg, "utf8"))
-        elif (data[0] == '\x12'):
-            check = data.split('|')[0]
-            # print(check)
-            if (check == "\x12{Peers}"):
-                # print("adding peers")
-                added = self.update_peers(data)
-                if added:
-                    self.broadcast(bytes(data, 'utf8'))
         x = 10
+        logging.debug("Before while loop")
+
         while True:  # x > 0:
             x = x - 1
             msg = client.recv(self.BUFSIZ)
             if msg != bytes("\x13{quit}", "utf8"):
-                print(msg.decode('utf8'))
+                logging.debug("printing {}".format(msg[1:].decode('utf8')))
+
+                if client.getpeername()[0] != "127.0.0.1":
+                    print(msg.decode('utf8'))
+                '''
                 msgDecode = msg.decode('utf8')
                 if (msgDecode.split("|")[0] == "\x12{Peers}"):
                     added = self.update_peers(msgDecode)
@@ -88,7 +81,9 @@ class Node:
                         self.broadcast(msg)
                 else:
                     self.broadcast(msg, self.name + ": ")
+                '''
             else:
+
                 try:
                     client.send(bytes("\x13{quit}", "utf8"))
                 except ConnectionResetError:
@@ -97,9 +92,10 @@ class Node:
                 self.userquit(name)
                 break
 
+    '''
     def update_peers(self, peer_str):
         func = inspect.currentframe().f_back.f_code
-
+        logging.debug("Added peers!")
         # print(peer_str)
         peers_csv = peer_str.split("|")[1]
         peers = list(peers_csv.split(","))
@@ -113,6 +109,7 @@ class Node:
                 self.register_conn(addr, name)
                 added = True
         return added
+    '''
 
     def register_conn(self, addr, name):
         func = inspect.currentframe().f_back.f_code
@@ -122,14 +119,23 @@ class Node:
             logging.debug("Registering peer {0} at {1}".format(name, addr))
             port = int(port)
             sock = socket(AF_INET, SOCK_STREAM)
-            logging.debug("{}{}".format(addr,name))
+            logging.debug("{}{}".format(addr, name))
             sock.connect((ip, port))
             self.connections[name] = ((ip, port), sock)
+            logging.debug("Connections: ")
+            c = 0
+            for key, value in self.connections.items():
+                logging.debug("{}{}:{}".format(c,key,value))
+                c+=1
+
+            '''
             peers = "\x12{Peers}|" + ",".join(list(
                 map(lambda x: x + ":" + self.connections[x][0][0] + ":" + str(self.connections[x][0][1]),
                     self.connections)))
             peers = peers + ",{0}:{1}".format(self.name, self.server_addr)
             self.broadcast(bytes(peers, 'utf8'))
+            '''
+
         else:
             logging.debug("not registering a local connection, that's silly.")
 
@@ -152,7 +158,7 @@ class Node:
         # Nodes need to note that a peer has left still, and remove it from their peer store
         logging.debug("{0} has quit.".format(name))
         del self.connections[name]
-        self.broadcast(bytes("%s has left the chat." % name, "utf8"))
+        #self.broadcast(bytes("%s has left the chat." % name, "utf8"))
 
     def input_loop(self):
         func = inspect.currentframe().f_back.f_code
@@ -160,7 +166,8 @@ class Node:
         """Handles sending of messages."""
         while True:
             msg = input("Get Input: ")
-            self.client_sock.send(bytes("\x10" + msg, "utf8"))
+            #self.client_sock.send(bytes("\x10" + msg, "utf8"))
+            self.broadcast(bytes(msg,"utf-8"),'b\x10')
             if msg == "\x13{quit}":
                 self.client_sock.close()
                 break
@@ -183,7 +190,7 @@ class Node:
 
     def __init__(self, server_addr, client_addr):
         func = inspect.currentframe().f_back.f_code
-        logging.debug("{},{}".format(server_addr,client_addr))
+        logging.debug("{},{}".format(server_addr, client_addr))
 
         # server = Node.Server(server_addr)
         self.connections = {}
@@ -207,10 +214,9 @@ else:
 
 if client_addr == "":
     # client_addr = server_addr
-    client_addr = "127.0.0.1:"+str(PORT)
+    client_addr = "127.0.0.1:" + str(PORT)
 else:
-    client_addr += ":"+str(PORT)
-
+    client_addr += ":" + str(PORT)
 
 node = Node(server_addr, client_addr)
 
