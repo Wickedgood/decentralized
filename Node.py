@@ -66,7 +66,6 @@ class Node:
 
     def handle_client(self, client):  # Takes client socket as argument.
         func = inspect.currentframe().f_back.f_code
-        logging.debug("client: {}".format(str(client)))
         data = client.recv(self.buffersize).decode("utf8")
         if data[0] == '\x11':
             logging.debug("Got a registration? data ={}".format(str(data)))
@@ -131,12 +130,13 @@ class Node:
             sock.connect((ip, port))
             self.connections[name] = ((ip, port), sock)
             logging.debug("Connections: ")
+            '''
             c = 0
             for key, value in self.connections.items():
                 logging.debug("{}{}:{}".format(c, key, value))
                 c += 1
 
-            '''
+            
             peers = "\x12{Peers}|" + ",".join(list(
                 map(lambda x: x + ":" + self.connections[x][0][0] + ":" + str(self.connections[x][0][1]),
                     self.connections)))
@@ -147,6 +147,19 @@ class Node:
         else:
             logging.debug("not registering a local connection, that's silly.")
 
+    def broadcast(self, msg, prefix=""):
+        func = inspect.currentframe().f_back.f_code
+        sender = msg.decode('utf8').split(":")[0:-1]
+        logging.debug("sender={} msg={}".format(sender, msg))
+        c = 0
+        for name, value in self.connections.items():
+            logging.debug("to={} info={} msg={}".format(name, str(self.connections[name][0]), msg))
+            socket = value[1]
+            socket.send(bytes(prefix, "utf8") + msg)
+            c += 1
+
+    '''
+    ORIGINAL
     def broadcast(self, msg, prefix=""):
         func = inspect.currentframe().f_back.f_code
         logging.debug("{}".format(msg))
@@ -160,6 +173,7 @@ class Node:
                     self.connections[name][1].send(bytes(prefix, "utf8") + msg)
                 except ConnectionResetError:
                     logging.debug("Cannot send to ", prefix, " Connection has been reset")
+    '''
 
     def userquit(self, name):
         func = inspect.currentframe().f_back.f_code
