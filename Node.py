@@ -26,9 +26,9 @@ class Node:
         self.start_server(serveraddresstouse)
         logging.debug("server started")
         if clientaddresstouse is not None:
+            logging.debug("client has started")
             self.connect_client(clientaddresstouse)
-            self.input_loop()
-            logging.debug("client started")
+
 
     def start_server(self, serveraddresstouse):
         func = inspect.currentframe().f_back.f_code
@@ -150,7 +150,7 @@ class Node:
     def broadcast(self, msg, prefix=""):
         func = inspect.currentframe().f_back.f_code
         sender = msg.decode('utf8').split(":")[0:-1]
-        logging.debug("sender={} msg={}".format(sender, msg))
+        #logging.debug("sender={} msg={}".format(sender, msg))
         c = 0
         for name, value in self.connections.items():
             logging.debug("to={} info={} msg={}".format(name, str(self.connections[name][0]), msg))
@@ -189,6 +189,7 @@ class Node:
         """Handles sending of messages."""
         while True:
             msg = input("Get Input: ")
+            logging.debug("Calling input")
             # self.client_sock.send(bytes("\x10" + msg, "utf8"))
             self.broadcast(bytes(msg, "utf-8"), 'b\x10')
             if msg == "\x13{quit}":
@@ -205,10 +206,13 @@ class Node:
         self.client_sock.connect(self.client_addr)
         welcome_msg = self.client_sock.recv(self.buffersize).decode('utf8')
         self.name = input(welcome_msg)
-        register_msg = bytes(
-            "\x11{Register}" + "|{0}:{1}|{2}".format(self.serveraddress[0], self.serveraddress[1], self.name), 'utf8')
+        register_msg = bytes("\x11{Register}" + "|{0}:{1}|{2}".format(self.serveraddress[0], self.serveraddress[1], self.name), 'utf8')
+        logging.debug("Sending the register message")
         # print("Client Register Msg: " + self.name)
         self.client_sock.send(register_msg)
+
+        self.register(str(ip)+":"+str(port), "server-to-connect")
+        logging.debug("registering the connection")
         self.input_loop()
 
     '''
