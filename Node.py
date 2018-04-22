@@ -53,6 +53,7 @@ class Node:
         acceptthread.join()
         self.serversocket.close()
 
+
     # Listen for incomming connections
     def accept_incoming_connections(self):
         func = inspect.currentframe().f_back.f_code
@@ -60,6 +61,7 @@ class Node:
             client, client_address = self.serversocket.accept()
             # logging.debug("%s:%s has connected." % client_address)
             # Welcome message
+            logging.debug("USE THIS PORT STRUCTURE {}".format(str(client)))
             client.send(bytes("Type your name and press enter: ", "utf8"))
 
             Thread(target=self.handle_client, args=(client,)).start()
@@ -151,10 +153,12 @@ class Node:
         func = inspect.currentframe().f_back.f_code
         sender = msg.decode('utf8').split(":")[0:-1]
         #logging.debug("sender={} msg={}".format(sender, msg))
+        logging.debug("{}".format(str(self.connections)))
         c = 0
         for name, value in self.connections.items():
             logging.debug("to={} info={} msg={}".format(name, str(self.connections[name][0]), msg))
             socket = value[1]
+            logging.debug("{}".format(str(socket)))
             socket.send(bytes(prefix, "utf8") + msg)
             c += 1
 
